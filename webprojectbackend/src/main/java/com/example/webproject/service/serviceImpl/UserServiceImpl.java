@@ -1,15 +1,19 @@
 package com.example.webproject.service.serviceImpl;
 
 import com.example.webproject.model.Role;
+import com.example.webproject.model.Statistic;
 import com.example.webproject.model.User;
 import com.example.webproject.model.exception.InvalidUserException;
 import com.example.webproject.model.exception.ObjectExistException;
+import com.example.webproject.repository.RoleRepository;
+import com.example.webproject.repository.StatisticRepository;
 import com.example.webproject.repository.UserRepository;
+import com.example.webproject.service.StatisticService;
 import com.example.webproject.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,11 +21,15 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final StatisticService statisticService;
 
-    public UserServiceImpl(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, BCryptPasswordEncoder bCryptPasswordEncoder, StatisticService statisticService) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.statisticService = statisticService;
     }
 
     @Override
@@ -37,6 +45,12 @@ public class UserServiceImpl implements UserService {
             throw  new ObjectExistException("Your email already exist");
 
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+
+        Role role = roleRepository.findById(2L).get();
+        user.setRoles(Collections.singletonList(role));
+        role.setUsers(Collections.singletonList(user));
+        user.setStatisticId(statisticService.save(new Statistic()));
+
         return this.userRepository.save(user);
     }
 
@@ -63,5 +77,25 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(long id) {
         this.userRepository.deleteById(id);
+    }
+
+    @Override
+    public List<User> theBest5TipsterByProfit() {
+        return userRepository.theBest5TipsterByProfit();
+    }
+
+    @Override
+    public List<User> theBest5TipstersByWinRatio() {
+        return userRepository.theBest5TipstersByWinRatio();
+    }
+
+    @Override
+    public List<User> theBest5TipsterByWinRatioInLast30Days() {
+        return userRepository.theBest5TipsterByWinRatioInLast30Days();
+    }
+
+    @Override
+    public List<User> theBest5TipsterByProfitInLast30Days() {
+        return userRepository.theBest5TipsterByProfitInLast30Days();
     }
 }

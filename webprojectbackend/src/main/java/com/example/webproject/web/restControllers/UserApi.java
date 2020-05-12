@@ -67,7 +67,7 @@ public class UserApi {
     }
 
 
-    @PostMapping("/create")
+    @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
     public Object createUser(@Valid @RequestBody User user, BindingResult result){
         userValidator.validate(user,result);
@@ -97,4 +97,23 @@ public class UserApi {
     public void deleteUser(@PathVariable long id){
         this.userService.deleteUser(id);
     }
+
+    @GetMapping("/theBest5TipsterByProfit")
+    public List<User> theBest5TipsterByProfit(){
+        return this.userService.theBest5TipsterByProfit();
+    }
+
+    @GetMapping("/theBest5TipsterByProfit")
+    public List<User> theBest5TipstersByWinRatio(){
+        return this.userService.theBest5TipstersByWinRatio();
+    }
+    @GetMapping("/theBest5TipsterByProfit")
+    public List<User> theBest5TipsterByWinRatioInLast30Days(){
+        return this.userService.theBest5TipsterByWinRatioInLast30Days();
+    }
+    @GetMapping("/theBest5TipsterByProfit")
+    public List<User> theBest5TipsterByProfitInLast30Days(){
+        return this.userService.theBest5TipsterByProfitInLast30Days();
+    }
+
 }

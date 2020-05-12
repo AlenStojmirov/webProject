@@ -18,4 +18,9 @@ public interface UserService {
 
     void deleteUser(long id);
 
+    List<User> theBest5TipsterByProfit();
+    List<User> theBest5TipstersByWinRatio();
+    List<User> theBest5TipsterByWinRatioInLast30Days();
+    List<User> theBest5TipsterByProfitInLast30Days();
+
 }

@@ -52,4 +52,9 @@ public class PickServiceImpl implements PickService {
     public void deletePick(long id) {
         this.pickRepository.deleteById(id);
     }
+
+    @Override
+    public List<Pick> getAllPicksWithStatusNull() {
+        return pickRepository.getAllPicksWithStatusNull();
+    }
 }

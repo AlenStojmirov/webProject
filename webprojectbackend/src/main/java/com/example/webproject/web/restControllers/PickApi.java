@@ -1,9 +1,10 @@
 package com.example.webproject.web.restControllers;
 
 import com.example.webproject.model.Pick;
+import com.example.webproject.model.Statistic;
 import com.example.webproject.service.MapValidationErrorService;
 import com.example.webproject.service.PickService;
-import com.example.webproject.service.serviceImpl.CustomUserDetailsService;
+import com.example.webproject.service.StatisticService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MimeTypeUtils;
@@ -22,12 +23,13 @@ public class PickApi {
 
     private final PickService pickService;
     private final MapValidationErrorService mapValidationErrorService;
-    private final CustomUserDetailsService customUserDetailsService;
+    private final StatisticService statisticService;
 
-    public PickApi(PickService pickService, MapValidationErrorService mapValidationErrorService, CustomUserDetailsService customUserDetailsService) {
+
+    public PickApi(PickService pickService, MapValidationErrorService mapValidationErrorService, StatisticService statisticService) {
         this.pickService = pickService;
         this.mapValidationErrorService = mapValidationErrorService;
-        this.customUserDetailsService = customUserDetailsService;
+        this.statisticService = statisticService;
     }
 
     @GetMapping
@@ -52,16 +54,44 @@ public class PickApi {
     }
 
     @PostMapping("/{id}")
-    @ResponseStatus(HttpStatus.ACCEPTED)
-    public Pick updatePick(@PathVariable long id,
-                               @RequestBody Pick pick){
-        pick.setId(id);
-        return this.pickService.save(pick,pick.getUser().getUsername());
+    @ResponseStatus(HttpStatus.OK)
+    public void updatePick(@PathVariable long id,
+                               @RequestBody String status){
+        Pick pick = pickService.findById(id).get();
+        Statistic stats = statisticService.findById(pick.getUser().getStatisticId().getId()).get();
+        pick.setStatus(status);
+
+        if(status.equals("WIN")){
+            stats.setNumPicks(stats.getNumPicks() + 1);
+            stats.setWinRatio(
+                    ((float)(stats.getWin() + 1) / (stats.getNumPicks())) * 100);
+            stats.setProfit(stats.getProfit() +
+                    ((pick.getOdd() * ((float)pick.getStake()/10)) - (float)(pick.getStake()/10)));
+            stats.setWin(stats.getWin() + 1);
+        }else if(status.equals("LOSE")){
+            stats.setNumPicks(stats.getNumPicks() + 1);
+            stats.setWinRatio(
+                    ((float)stats.getWin() / (stats.getNumPicks())) * 100);
+            stats.setProfit(stats.getProfit() -
+                    ((pick.getOdd() * ((float)pick.getStake()/10)) - (float)(pick.getStake()/10)));
+            stats.setLose(stats.getLose() + 1);
+        }else {
+            stats.setNumPicks(stats.getNumPicks() + 1);
+            stats.set_void(stats.get_void() + 1);
+        }
+
+        pickService.save(pick,pick.getUser().getUsername());
+        statisticService.save(stats);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public void deleteLeague(@PathVariable long id){
         this.pickService.deletePick(id);
+    }
+
+    @GetMapping("/nullPicks")
+    public List<Pick> getAllNotRegularPicks(){
+        return this.pickService.getAllPicksWithStatusNull();
     }
 }

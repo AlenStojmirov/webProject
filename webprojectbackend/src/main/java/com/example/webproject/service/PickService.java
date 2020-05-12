@@ -15,4 +15,6 @@ public interface PickService {
     Pick updatePick(long id, String info, String status_private_public);
 
     void deletePick(long id);
+
+    List<Pick> getAllPicksWithStatusNull();
 }

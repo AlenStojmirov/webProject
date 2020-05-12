@@ -41,7 +41,7 @@ public class Club {
             name = "clubs_leagues",
             joinColumns = @JoinColumn(name = "clubId"),
             inverseJoinColumns = @JoinColumn(name = "leagueId"))
-    @NotNull(message = "League is required")
+//    @NotNull(message = "League is required")
     private List<League> leagues;
 
 }
